@@ -61,8 +61,6 @@ async function listEmails() {
         body: body || 'Sem conteúdo', // Inclui o corpo do e-mail
       });
     }
-
-    console.log('Emails:', emails); // Exibe o ID, threadId, subject e body de cada e-mail
     return emails;
   } catch (error) {
     console.error('Erro ao listar e-mails:', error);
