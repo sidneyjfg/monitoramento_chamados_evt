@@ -16,6 +16,8 @@ build/
 .env.production
 .env.test
 src/config/google-credentials.json
+molde.yml
+
 # Logs
 logs
 *.log
