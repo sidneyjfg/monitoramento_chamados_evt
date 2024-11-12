@@ -1,0 +1,50 @@
+# Dependências do Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Diretórios de build
+dist/
+build/
+
+# Configurações e variáveis de ambiente
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+src/config/google-credentials.json
+# Logs
+logs
+*.log
+*.log.*
+pids
+*.pid
+*.pid.lock
+
+# Diretórios de armazenamento temporário
+tmp/
+temp/
+
+# Cache do TypeScript
+*.tsbuildinfo
+
+# Cache do Docker
+.dockerignore
+docker-compose.override.yml
+
+# Configurações do editor (ex: VSCode)
+.vscode/
+.idea/
+*.swp
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos específicos do sistema operacional
+*.bak
+*.backup
+*.swp
