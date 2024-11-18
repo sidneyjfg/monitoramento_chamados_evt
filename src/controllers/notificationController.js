@@ -7,34 +7,40 @@ const { logInfo, logError } = require('../utils/logger');
 const notifyNewEmails = async (lastProcessedEmailId) => {
   try {
     const emails = await listEmails();
+    console.log("[LOG] Todos os Emails: ", emails);
+    // Ordena e-mails do mais antigo para o mais recente
+    emails.sort((a, b) => parseInt(a.internalDate) - parseInt(b.internalDate));
+    console.log("[INFO] Emails Organizado");
+    emails.forEach(email => {
+      console.log(`[LOG] ID: ${email.id}, internalDate: ${email.internalDate}, Date: ${new Date(parseInt(email.internalDate))}`);
+    });
 
-    // Ordenar os e-mails do mais antigo para o mais recente com base no `internalDate`
-    emails.sort((a, b) => new Date(a.internalDate) - new Date(b.internalDate));
-
-    // Encontrar o índice do último e-mail processado
     const lastProcessedIndex = lastProcessedEmailId
       ? emails.findIndex(email => email.id === lastProcessedEmailId)
       : -1;
 
-    // Se encontrar o último processado, pegue os e-mails após ele
+    // Seleciona os e-mails novos após o último processado
     const newEmails = lastProcessedIndex !== -1 ? emails.slice(lastProcessedIndex + 1) : emails;
     console.log("Novos emails? ", newEmails);
-
-    let latestEmailId = lastProcessedEmailId;
 
     // Processa os novos e-mails do mais antigo para o mais recente
     for (const email of newEmails) {
       const { subject, body } = email;
       const { customerName, evtNumber, internalTicket } = parseEmailSubject(subject);
 
-      const responsibleMatch = body.match(/(?:atenciosamente|att)[.,\s\r\n]*([\w\s]+)\.?/i);
-      const responsibleName = responsibleMatch ? responsibleMatch[1].trim() : 'Desconhecido';
+      const responsibleMatch = [...body.matchAll(/(?:atenciosamente|att)[.,\s\r\n]*([\w\s]+)\.?/gi)];
+      const responsibleName = responsibleMatch.length > 0
+        ? responsibleMatch[responsibleMatch.length - 1][1].trim()
+        : 'Desconhecido';
+
+      console.log("ResponsibleMatch", responsibleMatch);
       const changesMatch = body.match(/Tarefa.*?\r\r\n([\s\S]*?)\r\r\n\r\r\n/);
       const changes = changesMatch ? changesMatch[1].trim() : 'Sem alterações';
-      
+
       const message = `<b>Cliente:</b> ${customerName}<br><b>Número EVT:</b> #${evtNumber}<br><b>Ticket Interno:</b> ${internalTicket}<br><br><b>Responsável:</b> ${responsibleName}<br><b>Alterações:</b><br><i>${changes}</i>`;
 
-      console.log("Email Id: ", email.id, "\nAssunto: ", subject);
+      console.log(`Email Id: ", ${email.id},\nResponsável: ${responsibleName} , "\nAssunto: ", ${subject}`);
+      console.log("Messagem: ", message);
       try {
         await sendToGoogleChat(message, evtNumber);
         console.log('Mensagem enviada ao Google Chat com sucesso');
@@ -45,12 +51,11 @@ const notifyNewEmails = async (lastProcessedEmailId) => {
           await new Promise(resolve => setTimeout(resolve, 60000)); // Espera 60 segundos
         }
       }
+    }
 
-      // Definir este e-mail como o último processado
-      latestEmailId = email.id;
-
-      // Intervalo entre solicitações para evitar o limite de taxa
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    // Atualiza `latestEmailId` para o ID do e-mail mais recente processado
+    if (newEmails.length > 0) {
+      latestEmailId = newEmails[newEmails.length - 1].id;
     }
 
     logInfo('Processamento de e-mails concluído');
@@ -59,7 +64,7 @@ const notifyNewEmails = async (lastProcessedEmailId) => {
   } catch (error) {
     logError(`Erro ao processar e-mails: ${error.message}`);
     console.error(error.stack);
-    return lastProcessedEmailId; // Retornar o ID anterior em caso de erro
+    return lastProcessedEmailId; // Retorna o ID anterior em caso de erro
   }
 };
 

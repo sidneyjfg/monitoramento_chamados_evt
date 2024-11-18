@@ -12,7 +12,7 @@ const parseEmailSubject = (subject) => {
 
   const customerNameMatch = subject.match(/B2C - (.+?) - Incident/);
   const evtNumberMatch = subject.match(/Incident #(\d+)/);
-  const internalTicketMatch = subject.match(/ticket interno #(\d+)/i);
+  const internalTicketMatch = subject.match(/ticket interno[\s#-]+(\d+)/i);
 
   return {
     customerName: customerNameMatch ? customerNameMatch[1].trim() : 'Desconhecido',

@@ -10,6 +10,7 @@ const main = async () => {
   try {
     while (true) {
       console.log('Iniciando verificação de e-mails...');
+      console.log('Versão mais atualizada');
       const newLastEmailId = await notifyNewEmails(lastEmailId);
       console.log("Ultimo email recebido no Index: ",newLastEmailId);
 

@@ -59,6 +59,7 @@ async function listEmails() {
         threadId: message.threadId,
         subject,
         body: body || 'Sem conteúdo', // Inclui o corpo do e-mail
+        internalDate: emailData.data.internalDate, // Adiciona a data interna do e-mail
       });
     }
     return emails;
